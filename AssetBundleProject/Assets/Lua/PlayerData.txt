@@ -1,0 +1,42 @@
+PlayerData = {}
+--我们目前只做背包功能 所以只需要它的道具信息即可
+
+PlayerData.all={}
+PlayerData.equips = {}
+PlayerData.food = {}
+PlayerData.materials = {}
+
+--为玩家数据写了一个初始化方法 以后直接该这里的数据来源即可
+function PlayerData:Init()
+    --道具信息 不管存本地还是存服务器都不会把道具所有的信息都存进去
+    --道具ID和道具数量  
+
+    --目前因为没有服务器 为了测试 我们就写死道具数据作为玩家信息
+    table.insert(self.equips,{id = 1, num = 1,type=2})
+    table.insert(self.equips,{id = 2, num = 2,type=2})
+
+
+    table.insert(self.food,{id = 3, num = 10,type=3})
+    table.insert(self.food,{id = 4, num = 5,type=3})
+
+    table.insert(self.materials,{id = 5, num = 99,type=4})
+end
+
+function PlayerData:GetAll()
+	self.all=nil
+	self.all={}
+	table.merge(self.all,self.equips)
+	table.merge(self.all,self.food)
+	table.merge(self.all,self.materials)
+end
+
+function table.merge(dest, src)
+    --for k, v in pairs(src) do
+      --  dest[k] = v
+    --end
+    for k,v in pairs(src) do 
+        table.insert(dest, v) 
+    end
+end
+
+PlayerData:Init()

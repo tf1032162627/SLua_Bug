@@ -1,0 +1,6 @@
+ItemData = {{id=1,name="雾切之回光",icon="Icon_1",type=2,tips="攻击装备"},
+			{id=2,name="无常之面",icon="Icon_2",type=2,tips="防御武器"},
+			{id=3,name="明月蛋",icon="Icon_3",type=3,tips="食物"},
+			{id=4,name="苹果酿",icon="Icon_4",type=3,tips="食物"},
+			{id=5,name="碎片",icon="Icon_5",type=4,tips="材料"}}
+

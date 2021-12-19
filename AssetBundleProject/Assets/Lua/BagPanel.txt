@@ -1,0 +1,266 @@
+
+--一个面板对应一个表
+BasePanel:subClass("BagPanel")
+
+BagPanel.Content = nil
+BagPanel.ItemName = nil
+BagPanel.ItemDes = nil
+BagPanel.Weapon=nil
+BagPanel.Clothing=nil
+
+--用来存储当前显示的格子
+BagPanel.items = {}
+
+BagPanel.nowType = -1
+BagPanel.nowId = nil
+local nowItems = nil
+
+
+--初始化方法
+function BagPanel:Init(name)
+    self.base.Init(self,name)
+    if self.isInitEvent == false then
+        --没有挂载UI控件的对象需要通过手动去找
+        self.Content = canvas.transform:Find("BagPanel(Clone)"):Find("content")
+        self.Weapon = canvas.transform:Find("BagPanel(Clone)"):Find("weapon"):Find("Image"):GetComponent("Image")
+        self.Clothing = canvas.transform:Find("BagPanel(Clone)"):Find("clothing"):Find("Image"):GetComponent("Image")
+        --加事件
+        --关闭按钮
+        self:GetControl("btn_close","Button").onClick:AddListener(
+            function()
+                self:HideMe()
+                MainPanel:ShowMe("MainPanel")
+                print("关闭背包")
+            end
+        )
+        
+        --使用物品
+        self:GetControl("btn_use","Button").onClick:AddListener(
+            function()                      --根据不同的道具类型进行不同的操作
+                print("type" .. self.nowType);
+                if self.nowType == 1 then
+                    for i=1, #PlayerData.all do
+                        if self.nowId == PlayerData.all[i].id then
+                            if PlayerData.all[i].type== 2 then
+                                for j=1, #PlayerData.equips do
+                                    if self.nowId == PlayerData.equips[j].id and PlayerData.equips[j].num > 0 then
+                                        PlayerData.equips[j].num = PlayerData.equips[j].num - 1
+                                        if (PlayerData.equips[j].id==1) then
+                                            self.Weapon.sprite = ABMgr:LoadResSprite("ui.unity3d",ItemData[PlayerData.equips[j].id].icon..".png")
+                                            self.Weapon.color=UnityEngine.Color.white
+                                        elseif
+                                            (PlayerData.equips[j].id==2) then
+                                            self.Clothing.sprite = ABMgr:LoadResSprite("ui.unity3d",ItemData[PlayerData.equips[j].id].icon..".png")
+                                            self.Clothing.color=UnityEngine.Color.white
+                                        end
+                                        print("装备"..ItemData[PlayerData.equips[j].id].name)
+                                    end
+                               end
+                            elseif PlayerData.all[i].type== 3 then
+                                for j=1, #PlayerData.food do
+                                    if self.nowId == PlayerData.food[j].id and PlayerData.food[j].num > 0 then
+                                        PlayerData.food[j].num = PlayerData.food[j].num - 1
+                                        print("使用"..ItemData[PlayerData.food[j].id].name)
+                                    end
+                                end
+                            elseif PlayerData.all[i].type== 4 then
+                                for j=1, #PlayerData.materials do
+                                    if self.nowId == PlayerData.materials[j].id and PlayerData.materials[j].num >= 30 then
+                                        PlayerData.materials[j].num = PlayerData.materials[j].num - 30
+                                        for k=1, #PlayerData.food do
+                                            if PlayerData.food[k].id == 4 then
+                                                PlayerData.food[k].num = PlayerData.food[k].num + 1
+                                                print("使用"..ItemData[PlayerData.materials[j].id].name.."获得"..ItemData[PlayerData.food[k].id].name)   
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                elseif self.nowType == 2 then
+                    for i=1, #PlayerData.equips do
+                        if self.nowId == PlayerData.equips[i].id and PlayerData.equips[i].num > 0 then
+                            PlayerData.equips[i].num = PlayerData.equips[i].num - 1
+                            if (PlayerData.equips[i].id==1) then
+                                self.Weapon.sprite = ABMgr:LoadResSprite("ui.unity3d",ItemData[PlayerData.equips[i].id].icon..".png")
+                                self.Weapon.color=UnityEngine.Color.white
+                            elseif (PlayerData.equips[i].id==2) then
+                                self.Clothing.sprite = ABMgr:LoadResSprite("ui.unity3d",ItemData[PlayerData.equips[i].id].icon..".png")
+                                self.Clothing.color=UnityEngine.Color.white
+                            end
+                            print("装备"..ItemData[PlayerData.equips[i].id].name)
+                        end
+                    end
+                elseif self.nowType == 3 then
+                    for i=1, #PlayerData.food do
+                        if self.nowId == PlayerData.food[i].id and PlayerData.food[i].num > 0 then
+                            PlayerData.food[i].num = PlayerData.food[i].num - 1
+                            print("使用"..ItemData[PlayerData.food[i].id].name)
+                        end
+                    end
+                elseif self.nowType == 4 then
+                    for i=1, #PlayerData.materials do
+                        if self.nowId == PlayerData.materials[i].id and PlayerData.materials[i].num > 0 then
+                            if PlayerData.materials[i].num >= 30 then
+                                PlayerData.materials[i].num = PlayerData.materials[i].num - 30
+                                for j=1, #PlayerData.food do
+                                    if PlayerData.food[i].id == 4 then
+                                        PlayerData.food[i].num = PlayerData.food[i].num + 1
+                                        print("使用"..ItemData[PlayerData.materials[i].id].name.."获得"..ItemData[PlayerData.food[j].id].name)      
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                self:ChangeType(self.nowType)
+            end
+        )
+        
+        --出售物品
+        self:GetControl("btn_sell","Button").onClick:AddListener(
+            function()
+                print("type" .. self.nowType);
+                if self.nowType == 1 then
+                    for i=1, #PlayerData.all do
+                        if self.nowId == PlayerData.all[i].id then
+                            if PlayerData.all[i].type== 2 then
+                                for j=1, #PlayerData.equips do
+                                    if self.nowId == PlayerData.equips[j].id and PlayerData.equips[j].num > 0 then
+                                        PlayerData.equips[j].num = PlayerData.equips[j].num - 1
+                                        print("出售"..ItemData[PlayerData.equips[j].id].name)
+                                    end
+                               end
+                            elseif PlayerData.all[i].type== 3 then
+                                for j=1, #PlayerData.food do
+                                    if self.nowId == PlayerData.food[j].id and PlayerData.food[j].num > 0 then
+                                        PlayerData.food[j].num = PlayerData.food[j].num - 1
+                                        print("出售"..ItemData[PlayerData.food[j].id].name)
+                                    end
+                                end
+                            elseif PlayerData.all[i].type== 4 then
+                                for j=1, #PlayerData.materials do
+                                    if self.nowId == PlayerData.materials[j].id and PlayerData.materials[j].num > 0 then
+                                        PlayerData.materials[j].num = PlayerData.materials[j].num - 1
+                                        print("出售"..ItemData[PlayerData.materials[j].id].name)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                if self.nowType == 2 then
+                    for i=1, #PlayerData.equips do
+                        if self.nowId == PlayerData.equips[i].id and PlayerData.equips[i].num > 0 then
+                            PlayerData.equips[i].num = PlayerData.equips[i].num - 1
+                            print("出售"..ItemData[PlayerData.equips[i].id].name)
+                        end
+                    end
+                end
+
+                if self.nowType == 3 then
+                    for i=1, #PlayerData.food do
+                        if self.nowId == PlayerData.food[i].id and PlayerData.food[i].num > 0 then
+                            PlayerData.food[i].num = PlayerData.food[i].num - 1
+                            print("出售"..ItemData[PlayerData.food[i].id].name)
+                        end
+                    end
+                end
+
+                if self.nowType == 4 then
+                    for i=1, #PlayerData.materials do
+                        if self.nowId == PlayerData.materials[i].id and PlayerData.materials[i].num > 0 then 
+                            PlayerData.materials[i].num = PlayerData.materials[i].num - 1
+                            print("出售"..ItemData[PlayerData.materials[i].id].name)
+                        end
+                    end
+                end
+                self:ChangeType(self.nowType)
+            end
+        )
+
+
+        --单选框事件
+        --切页签
+        self:GetControl("tog_all","Toggle").onValueChanged:AddListener(
+            function(value)
+                if value == true    then
+                    self:ChangeType(1)
+                end
+            end
+        )    
+        self:GetControl("tog_equip","Toggle").onValueChanged:AddListener(
+            function(value)
+                if value == true    then
+                    self:ChangeType(2)
+                end
+            end
+        )    
+        self:GetControl("tog_food","Toggle").onValueChanged:AddListener(
+            function(value)
+                if value == true    then
+                    self:ChangeType(3)
+                end
+            end
+        )  
+        self:GetControl("tog_materials","Toggle").onValueChanged:AddListener(
+            function(value)
+                if value == true    then
+                    self:ChangeType(4)
+                end
+            end
+        ) 
+        self.isInitEvent = true     
+    end
+
+end
+
+--显示隐藏
+function BagPanel:ShowMe(name)
+    self.base.ShowMe(self,name)
+    if self.nowType == -1  then
+        self:ChangeType(1)
+    end
+end
+
+
+
+--逻辑处理函数
+--1全部 2装备 3食物 4材料
+function BagPanel:ChangeType(type)
+    --更新之前把老的格子删掉
+    for i = 1,#self.items do
+        self.items[i]:Destroy()
+    end
+    self.items = {}
+ --再根据当前选择的类型来创建新的格子BagPanel.items
+    --根据传入的的type来选择显示数据
+    self.nowType = type
+    if type == 1 then
+        PlayerData:GetAll()
+        nowItems = PlayerData.all
+    elseif type == 2 then
+        nowItems = PlayerData.equips
+    elseif type == 3 then
+        nowItems = PlayerData.food
+    else
+        nowItems = PlayerData.materials
+    end
+
+    
+    --创建格子
+    for i=1, #nowItems do
+        --根据数据创建格子对象
+        local grid = ItemGrid:new()
+
+        --实例化格子对象 设置位置
+        grid:Init(self.Content)
+        --初始化它的信息数量和图标
+        grid:InitData(nowItems[i])
+
+        --把它存起来
+        table.insert(self.items,grid)
+    end
+end
+

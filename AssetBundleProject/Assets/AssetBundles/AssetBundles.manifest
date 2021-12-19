@@ -1,0 +1,10 @@
+ManifestFileVersion: 0
+CRC: 2204002957
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: ui.unity3d
+      Dependencies: {}
+    Info_1:
+      Name: lua
+      Dependencies: {}

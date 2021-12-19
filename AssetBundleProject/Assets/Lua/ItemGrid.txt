@@ -1,0 +1,52 @@
+
+--用到之前讲过的知识 Object
+--生成一个table 继承Object 主要目的是要它里面实现的继承方法subClass和new
+Object:subClass("ItemGrid")
+
+--成员变量
+ItemGrid.Obj = nil
+ItemGrid.imgIcon = nil
+ItemGrid.Text = nil
+
+--成员函数
+--实例化格子对象
+function ItemGrid:Init(father)
+    self.obj = ABMgr:LoadRes("ui.unity3d","BagGrid")
+    --设置父对象
+    self.obj.transform:SetParent(father,false)
+    --找控件
+    self.imgIcon = self.obj.transform:Find("ArticleItem"):GetComponent(Image)
+    self.Text = self.obj.transform:Find("ArticleItem/Text"):GetComponent(Text)
+    self.btn = self.obj.transform:Find("btn_grid"):GetComponent(Button)
+end
+
+--初始化格子信息
+--data 是外面传入的道具信息 里面包含了 id 和 num
+function ItemGrid:InitData(data)
+
+    local itemData = ItemData[data.id]
+    --加载图标
+    self.imgIcon.sprite = ABMgr:LoadResSprite("ui.unity3d",itemData.icon..".png")
+    --设置它的数量
+    self.Text.text = data.num
+
+    self.btn.onClick:AddListener(
+        
+        function()
+            BagPanel.nowId = data.id
+            local nameAndTips = ItemData[data.id]
+            print(nameAndTips.tips)
+        end
+
+    )
+
+
+end
+
+
+
+--加自己的逻辑
+function ItemGrid:Destroy()
+    GameObject.Destroy(self.obj)
+    self.obj = nil
+end

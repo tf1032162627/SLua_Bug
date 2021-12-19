@@ -1,0 +1,15 @@
+function main()
+    require("ClassInit")
+    require("ItemData")
+    require("PlayerData")
+    require("BasePanel")
+    require("MainPanel")
+    require("BagPanel")
+    require("ItemGrid")
+
+
+    MainPanel:ShowMe("MainPanel")
+    if LoadLuaMgr ~= nil then
+        print("初始化lua成功")
+    end
+end
